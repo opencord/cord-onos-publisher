@@ -1,0 +1,18 @@
+[submodule "apps/aaa"]
+	path = apps/aaa
+	url = https://gerrit.opencord.org/aaa
+[submodule "apps/vtn"]
+	path = apps/vtn
+	url = https://gerrit.opencord.org/vtn
+[submodule "apps/config"]
+	path = apps/config
+	url = https://gerrit.opencord.org/config
+[submodule "apps/igmp"]
+	path = apps/igmp
+	url = https://gerrit.opencord.org/igmp
+[submodule "apps/mcast"]
+	path = apps/mcast
+	url = https://gerrit.opencord.org/mcast
+[submodule "apps/olt"]
+	path = apps/olt
+	url = https://gerrit.opencord.org/olt
