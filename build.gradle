@@ -45,6 +45,9 @@ ext {
     // The tag used to tag the docker images push to the target registry
     targetTag = project.hasProperty('targetTag') ? project.getProperty('targetTag') : 'candidate'
 
+    // The tag used to tag the docker images push to the target registry
+    targetTag = project.hasProperty('targetTag') ? project.getProperty('targetTag') : 'candidate'
+
     comps = [
             'aaa' : [
                     'type':     'gitmodule',
@@ -87,6 +90,12 @@ ext {
                     'branch' : 'master',
                     'tag' : appVersion,
                     'componentDir': './apps/config'
+            ],
+            'nginx': [
+                    'type':     'image',
+                    'upstream': upstreamReg,
+                    'name':     'nginx',
+                    'digest':   'sha256:b555f8c64ab4e85405e0d8b03f759b73ce88deb802892a3b155ef55e3e832806'
             ]
     ]
 }
@@ -106,12 +115,16 @@ task fetch {
 task buildImages (dependsOn: fetch, type: Exec){
     workingDir './apps'
     commandLine 'mvn', 'clean', 'install'
+    
+    workingDir './'
+
+    commandLine 'cp', '-R', '~/.m2/repository' 'repository/'
+    commandLine 'docker', 'build', '-t', 'cordproject/mavenrepo', '.'
 }
 
 // Publish image(s) built during the build step into targetReg registry using the targetTag
 // tag. See maas subproject for examples on how to do this.
-task publish {
-    // ...
+task publish (dependsOn: buildImages, type: Exec) {
 }
 
 tasks.addRule(new GitSubmoduleUpdateRule(project))
