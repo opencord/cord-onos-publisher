@@ -138,4 +138,10 @@ task publish {
     dependsOn publishMavenRepoImage
 }
 
+// Depending on the version of the apps this will either make a release or publish a snapshot
+task release (type: Exec) {
+    workingDir './apps'
+    commandLine 'mvn', 'clean', 'deploy'
+}
+
 tasks.addRule(new GitSubmoduleUpdateRule(project))
