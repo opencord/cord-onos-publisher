@@ -134,7 +134,7 @@ task buildImages (dependsOn: fetch) {
     dependsOn buildRepoImage
 }
 
-task publish {
+task publish (dependsOn: buildImages) {
     dependsOn publishMavenRepoImage
 }
 
