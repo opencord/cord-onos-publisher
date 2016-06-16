@@ -110,16 +110,45 @@ task copyLocalRepo (dependsOn: buildOnosApps, type: Exec) {
 }
 
 task buildRepoImage (dependsOn: copyLocalRepo, type: Exec) {
-    commandLine 'docker', 'build', '-t', 'cordproject/mavenrepo', '.'
+    commandLine 'docker', 'build', '-t', 'opencord/mavenrepo', '.'
 }
 
 task tagMavenRepoImage (type: Exec) {
-    commandLine 'docker', 'tag', 'cordproject/mavenrepo', "$targetReg/mavenrepo:$targetTag"
+    commandLine 'docker', 'tag', 'opencord/mavenrepo', "$targetReg/mavenrepo:$targetTag"
 }
 
 task publishMavenRepoImage (type: Exec) {
     dependsOn tagMavenRepoImage
     commandLine 'docker', 'push', "$targetReg/mavenrepo:$targetTag"
+}
+
+List.metaClass.asParam = { prefix, sep ->
+  if (delegate.size() == 0) {
+    ""
+  }
+  String result = "--" + prefix + "="
+  String p = ""
+  delegate.each {
+    result += p + "${it}"
+    p = sep
+  }
+  result
+}
+
+List.metaClass.p = { value, name ->
+  if (value != null && value != "") {
+      delegate << name + "=" + value
+  } else {
+      delegate
+  }
+}
+
+List.metaClass.p = { spec ->
+  if (spec != null && spec != "") {
+      delegate += spec
+  } else {
+      delegate
+  }
 }
 
 // ~~~~~~~~~~~~~~~~~~~ Global tasks ~~~~~~~~~~~~~~~~~~~~~~~
@@ -137,6 +166,44 @@ task buildImages (dependsOn: fetch) {
 task publish (dependsOn: buildImages) {
     dependsOn publishMavenRepoImage
 }
+
+task deploy (dependsOn: publishMavenRepoImage, type: Exec) {
+     println "Using deployment config: $deployConfig"
+    File configFile = new File(deployConfig)
+    def yaml = new Yaml()
+    def config = yaml.load(configFile.newReader())
+
+    executable = "ansible-playbook"
+    args = ["-i", config.seedServer.ip + ',']
+
+    if ( config.seedServer.user != null && config.seedServer.user != "" ) {
+        args = args << "--user=$config.seedServer.user"
+    }
+
+    def extraVars = []
+    if (config.seedServer) {
+        extraVars = extraVars.p(config.seedServer.extraVars)
+            .p(config.seedServer.password, "ansible_ssh_pass")
+            .p(config.seedServer.sudoPassword, "ansible_sudo_pass")
+            .p(config.seedServer.domain, "domain")
+    }
+
+    if (config.otherServers) {
+        extraVars = extraVars.p(config.otherServers.location, "prov_location")
+        .p(config.otherServers.rolesPath, "prov_role_path")
+        .p(config.otherServers.role, "prov_role")
+    }
+
+    if (config.docker) {
+        extraVars = extraVars.p(config.docker.registry, "docker_registry")
+            .p(config.docker.imageVersion, "docker_image_version")
+    }
+
+    def skipTags = [].p(config.seedServer.skipTags)
+
+    args = args.p(skipTags.asParam("skip-tags", ",")).p(extraVars.asParam("extra-vars", " ")) << "mavenrepo.yml"   
+}
+
 
 // Depending on the version of the apps this will either make a release or publish a snapshot
 task release (type: Exec) {
