@@ -16,5 +16,4 @@
       <commitInfoChoice>AUTHORS_AND_TITLES</commitInfoChoice>
       <includeCustomMessage>false</includeCustomMessage>
       <customMessage>"cord-onos-publisher"</customMessage>
-    </jenkins.plugins.slack.SlackNotifier>
 </jenkins.plugins.slack.SlackNotifier_-DescriptorImpl>
