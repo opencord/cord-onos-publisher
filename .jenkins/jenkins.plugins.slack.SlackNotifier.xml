@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<jenkins.plugins.slack.SlackNotifier_-DescriptorImpl plugin="slack@2.0.1">
+  <teamDomain>opencord</teamDomain>
+  <token>kkueX3fmLtcGV6vM4Sp4NVFz</token>
+  <room></room>
+  <buildServerUrl>http://jenkins.opencord.org/</buildServerUrl>
+</jenkins.plugins.slack.SlackNotifier_-DescriptorImpl>
