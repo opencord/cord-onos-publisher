@@ -4,4 +4,17 @@
   <token>kkueX3fmLtcGV6vM4Sp4NVFz</token>
   <room></room>
   <buildServerUrl>http://jenkins.opencord.org/</buildServerUrl>
+      <startNotification>false</startNotification>
+      <notifySuccess>true</notifySuccess>
+      <notifyAborted>false</notifyAborted>
+      <notifyNotBuilt>false</notifyNotBuilt>
+      <notifyUnstable>false</notifyUnstable>
+      <notifyFailure>true</notifyFailure>
+      <notifyBackToNormal>false</notifyBackToNormal>
+      <notifyRepeatedFailure>false</notifyRepeatedFailure>
+      <includeTestSummary>false</includeTestSummary>
+      <commitInfoChoice>AUTHORS_AND_TITLES</commitInfoChoice>
+      <includeCustomMessage>false</includeCustomMessage>
+      <customMessage>"cord-onos-publisher"</customMessage>
+    </jenkins.plugins.slack.SlackNotifier>
 </jenkins.plugins.slack.SlackNotifier_-DescriptorImpl>
