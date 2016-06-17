@@ -169,7 +169,7 @@ task publish (dependsOn: buildImages) {
     dependsOn publishMavenRepoImage
 }
 
-task deploy (dependsOn: publishMavenRepoImage, type: Exec) {
+task deploy (type: Exec) {
     doLast {
         println "Using deployment config: $deployConfig"
         File configFile = new File(deployConfig)
