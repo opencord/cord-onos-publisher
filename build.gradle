@@ -92,6 +92,8 @@ ext {
                     'componentDir': './apps/config'
             ]
     ]
+
+    deployConfig = project.hasProperty('deployConfig') ? project.getProperty('deployConfig') : './config/default.yml'
 }
 
 
@@ -168,7 +170,7 @@ task publish (dependsOn: buildImages) {
 }
 
 task deploy (dependsOn: publishMavenRepoImage, type: Exec) {
-     println "Using deployment config: $deployConfig"
+    println "Using deployment config: $deployConfig"
     File configFile = new File(deployConfig)
     def yaml = new Yaml()
     def config = yaml.load(configFile.newReader())
