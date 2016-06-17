@@ -165,12 +165,12 @@ task buildImages (dependsOn: fetch) {
     dependsOn buildRepoImage
 }
 
-task publish (dependsOn: buildImages) {
+task publish {
+    dependsOn buildImages
     dependsOn publishMavenRepoImage
 }
 
 task deploy (type: Exec) {
-    doLast {
         println "Using deployment config: $deployConfig"
         File configFile = new File(deployConfig)
         def yaml = new Yaml()
@@ -205,7 +205,6 @@ task deploy (type: Exec) {
         def skipTags = [].p(config.seedServer.skipTags)
 
         args = args.p(skipTags.asParam("skip-tags", ",")).p(extraVars.asParam("extra-vars", " ")) << "mavenrepo.yml"   
-    }
 }
 
 
