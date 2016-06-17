@@ -2,7 +2,7 @@
   <teamDomain>opencord</teamDomain>
   <authToken>kkueX3fmLtcGV6vM4Sp4NVFz</authToken>
   <buildServerUrl>http://jenkins.opencord.org/</buildServerUrl>
-  <room>#notifications</room>
+  <room>notifications</room>
   <startNotification>false</startNotification>
   <notifySuccess>true</notifySuccess>
   <notifyAborted>false</notifyAborted>
@@ -14,5 +14,5 @@
   <includeTestSummary>false</includeTestSummary>
   <commitInfoChoice>AUTHORS_AND_TITLES</commitInfoChoice>
   <includeCustomMessage>true</includeCustomMessage>
-  <customMessage>"cord-onos-publisher"</customMessage>
+  <customMessage>cord-onos-publisher</customMessage>
 </jenkins.plugins.slack.SlackNotifier>
