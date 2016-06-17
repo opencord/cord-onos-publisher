@@ -1,8 +1,8 @@
 <jenkins.plugins.slack.SlackNotifier plugin="slack@2.0.1">
-  <teamDomain></teamDomain>
-  <authToken></authToken>
+  <teamDomain>opencord</teamDomain>
+  <authToken>kkueX3fmLtcGV6vM4Sp4NVFz</authToken>
   <buildServerUrl>http://jenkins.opencord.org/</buildServerUrl>
-  <room></room>
+  <room>#notifications</room>
   <startNotification>false</startNotification>
   <notifySuccess>true</notifySuccess>
   <notifyAborted>false</notifyAborted>
