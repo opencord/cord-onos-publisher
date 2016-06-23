@@ -103,7 +103,7 @@ task fetchGitSubmodules {
 
 task buildOnosApps (type: Exec) {
     workingDir './apps'
-    commandLine 'mvn', 'clean', 'install'
+    commandLine 'mvn', 'clean', 'install', '-U'
 }
 
 task copyLocalRepo (dependsOn: buildOnosApps, type: Exec) {
