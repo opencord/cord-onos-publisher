@@ -1,0 +1,16 @@
+#!/bin/bash
+
+#-----------------------------------------------
+#Updates versions for all onos cord applications
+#-----------------------------------------------
+
+APP_VERSION=$1
+ONOS_VERSION=$2
+
+cd apps
+
+mvn versions:set -DnewVersion=$APP_VERSION versions:commit
+git submodule foreach mvn versions:set -DnewVersion=$APP_VERSION versions:commit
+
+
+git submodule foreach mvn versions:update-parent -DparentVersion=[$ONOS_VERSION]
