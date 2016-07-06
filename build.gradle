@@ -170,7 +170,7 @@ task publish {
     dependsOn publishMavenRepoImage
 }
 
-task deploy (type: Exec) {
+task deployBase (type: Exec) {
         println "Using deployment config: $deployConfig"
         File configFile = new File(deployConfig)
         def yaml = new Yaml()
@@ -189,6 +189,7 @@ task deploy (type: Exec) {
                     .p(config.seedServer.password, "ansible_ssh_pass")
                     .p(config.seedServer.sudoPassword, "ansible_sudo_pass")
                     .p(config.seedServer.domain, "domain")
+	            .p(config.seedServer.port, "ansible_ssh_port")
         }
 
         if (config.otherServers) {
