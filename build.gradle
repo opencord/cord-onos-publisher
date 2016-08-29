@@ -37,8 +37,6 @@ allprojects {
 
 ext {
 
-    appVersion = null
-
     // Upstream registry to simplify filling out the comps table below
     upstreamReg = project.hasProperty('upstreamReg') ? project.getProperty('upstreamReg') : 'docker.io'
 
@@ -48,58 +46,9 @@ ext {
     // The tag used to tag the docker images push to the target registry
     targetTag = project.hasProperty('targetTag') ? project.getProperty('targetTag') : 'candidate'
 
-    comps = [
-            'aaa' : [
-                    'type':     'gitmodule',
-                    'upstream': 'https://gerrit.opencord.org/aaa',
-                    'branch' : 'master',
-                    'tag' : appVersion,
-                    'componentDir': './apps/aaa'
-            ],
-            'vtn' : [
-                    'type':     'gitmodule',
-                    'upstream': 'https://gerrit.opencord.org/vtn',
-                    'branch' : 'master',
-                    'tag' : appVersion,
-                    'componentDir': './apps/vtn'
-            ],
-            'mcast' : [
-                    'type':     'gitmodule',
-                    'upstream': 'https://gerrit.opencord.org/mcast',
-                    'branch' : 'master',
-                    'tag' : appVersion,
-                    'componentDir': './apps/mcast'
-            ],
-            'igmp' : [
-                    'type':     'gitmodule',
-                    'upstream': 'https://gerrit.opencord.org/igmp',
-                    'branch' : 'master',
-                    'tag' : appVersion,
-                    'componentDir': './apps/igmp'
-            ],
-            'olt' : [
-                    'type':     'gitmodule',
-                    'upstream': 'https://gerrit.opencord.org/olt',
-                    'branch' : 'master',
-                    'tag' : appVersion,
-                    'componentDir': './apps/olt'
-            ],
-            'config' : [
-                    'type':     'gitmodule',
-                    'upstream': 'https://gerrit.opencord.org/config',
-                    'branch' : 'master',
-                    'tag' : appVersion,
-                    'componentDir': './apps/config'
-            ]
-    ]
-
     deployConfig = project.hasProperty('deployConfig') ? project.getProperty('deployConfig') : './config/default.yml'
 }
 
-
-task fetchGitSubmodules {
-    comps.each { name, spec -> if (spec.type == 'gitmodule') { dependsOn "gitupdate" + name } }
-}
 
 task buildOnosApps (type: Exec) {
     workingDir './apps'
@@ -156,21 +105,20 @@ List.metaClass.p = { spec ->
 // ~~~~~~~~~~~~~~~~~~~ Global tasks ~~~~~~~~~~~~~~~~~~~~~~~
 
 task fetch {
-    dependsOn fetchGitSubmodules
+    logger.info 'Nothing to fetch for me'
 }
 
-task buildImages (dependsOn: fetch) {
+task buildImages {
     dependsOn buildOnosApps
     dependsOn copyLocalRepo
     dependsOn buildRepoImage
 }
 
 task publish {
-    dependsOn buildImages
     dependsOn publishMavenRepoImage
 }
 
-task deployBase (type: Exec) {
+task deploy (type: Exec) {
         println "Using deployment config: $deployConfig"
         File configFile = new File(deployConfig)
         def yaml = new Yaml()
@@ -214,5 +162,3 @@ task release (type: Exec) {
     workingDir './apps'
     commandLine 'mvn', 'clean', 'deploy'
 }
-
-tasks.addRule(new GitSubmoduleUpdateRule(project))
