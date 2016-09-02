@@ -33,7 +33,7 @@
     <groupId>org.opencord</groupId>
     <artifactId>cord</artifactId>
     <packaging>pom</packaging>
-    <version>1.0-rc4</version>
+    <version>1.0.0</version>
 
     <name>${project.artifactId}</name>
     <description>Open CORD root project</description>
