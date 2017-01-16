@@ -39,3 +39,11 @@ ansible/*.retry
 
 # Maven repository
 repository
+
+# sub repos
+apps/aaa/
+apps/config/
+apps/igmp/
+apps/mcast/
+apps/olt/
+apps/vtn/
