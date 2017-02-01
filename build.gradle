@@ -54,8 +54,8 @@ ext {
         ? project.getProperty('targetReg')
         : config.docker && config.docker.registry
             ? config.docker.registry
-            : config.seedServer.ip
-                ? config.seedServer.ip + ":5000"
+            : config.headnode.ip
+                ? config.headnode.ip + ":5000"
                 : 'localhost:5000'
 
     // The tag used to tag the docker images push to the target registry
@@ -137,19 +137,18 @@ task publish {
 
 task deploy (type: Exec) {
         executable = "ansible-playbook"
-        args = ["-i", config.seedServer.ip + ',']
+        args = ["-i", config.headnode.ip + ',']
 
-        if ( config.seedServer.ansible_user != null && config.seedServer.ansible_user != "" ) {
-            args = args << "--user=$config.seedServer.ansible_user"
+        if ( config.headnode.ansible_user != null && config.headnode.ansible_user != "" ) {
+            args = args << "--user=$config.headnode.ansible_user"
         }
 
         def extraVars = []
-        if (config.seedServer) {
-            extraVars = extraVars.p(config.seedServer.extraVars)
-                    .p(config.seedServer.ansible_ssh_pass, "ansible_ssh_pass")
-                    .p(config.seedServer.ansible_sudo_pass, "ansible_sudo_pass")
-                    .p(config.seedServer.domain, "domain")
-	            .p(config.seedServer.ansible_ssh_port, "ansible_ssh_port")
+        if (config.headnode) {
+            extraVars = extraVars.p(config.common.extraVars)
+              .p(config.headnode.ansible_ssh_pass, "ansible_ssh_pass")
+              .p(config.headnode.ansible_sudo_pass, "ansible_sudo_pass")
+	            .p(config.headnode.ansible_ssh_port, "ansible_ssh_port")
         }
 
         if (config.otherServers) {
@@ -163,7 +162,7 @@ task deploy (type: Exec) {
                 .p(config.docker.imageVersion, "docker_image_version")
         }
 
-        def skipTags = [].p(config.seedServer.skipTags)
+        def skipTags = [].p(config.common.skipTags)
 
         args = args.p(skipTags.asParam("skip-tags", ",")).p(extraVars.asParam("extra-vars", " ")) << "mavenrepo.yml"   
 }
