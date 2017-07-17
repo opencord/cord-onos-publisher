@@ -1,18 +1,29 @@
-FROM maven:3-jdk-8 as maven
-MAINTAINER Andy Bavier <andy@opennetworking.org>
+# Dockerfile for onos-apps maven repo
 
-COPY . /usr/src/mymaven
-WORKDIR /usr/src/mymaven/apps
+FROM maven:3-jdk-8 as maven
+COPY settings.xml /root/.m2/settings.xml
+COPY . /mavenwd
+WORKDIR /mavenwd/apps
 RUN mvn clean install -U
 
 FROM nginx
-MAINTAINER Andy Bavier <andy@opennetworking.org>
-
-COPY --from=maven /usr/src/mymaven/repository /usr/share/nginx/html/repository
+WORKDIR /usr/share/nginx/html
+COPY --from=maven /mavenwd/repository repository
 RUN chown nginx:nginx -R /usr/share/nginx/html/repository
 
-LABEL org.label-schema.name="opencord/mavenrepo" \
-      org.label-schema.description="Maven repo with the CORD ONOS apps" \
-      org.label-schema.vcs-url="https://gerrit.opencord.org/onos-apps" \
-      org.label-schema.vendor="Open Networking Laboratory" \
-      org.label-schema.schema-version="1.0"
+# Label image
+ARG org_label_schema_schema_version=1.0
+ARG org_label_schema_name=opencord/mavenrepo
+ARG org_label_schema_version=unknown
+ARG org_label_schema_vcs_url=unknown
+ARG org_label_schema_vcs_ref=unknown
+ARG org_label_schema_build_date=unknown
+ARG org_opencord_vcs_commit_date=unknown
+
+LABEL org.label-schema.schema-version=$org_label_schema_schema_version \
+      org.label-schema.name=$org_label_schema_name \
+      org.label-schema.version=$org_label_schema_version \
+      org.label-schema.vcs-url=$org_label_schema_vcs_url \
+      org.label-schema.vcs-ref=$org_label_schema_vcs_ref \
+      org.label-schema.build-date=$org_label_schema_build_date \
+      org.opencord.vcs-commit-date=$org_opencord_vcs_commit_date
