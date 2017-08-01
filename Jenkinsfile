@@ -1,4 +1,4 @@
-node ('host-master') {
+node ('master') {
     stage 'Checkout code'
     checkout([$class: 'RepoScm', currentBranch: true, manifestRepositoryUrl: 'https://gerrit.opencord.org/manifest', quiet: true])
     

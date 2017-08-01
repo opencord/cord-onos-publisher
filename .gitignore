@@ -48,4 +48,6 @@ apps/mcast/
 apps/olt/
 apps/vtn/
 apps/carrierethernet/
+apps/sadis/
+apps/igmpproxy/
 
