@@ -42,8 +42,10 @@
         <module>aaa</module>
         <module>config</module>
         <module>igmp</module>
+        <module>igmpproxy</module>
         <module>mcast</module>
         <module>olt</module>
+        <module>sadis</module>
         <module>vtn</module>
     </modules>
 
