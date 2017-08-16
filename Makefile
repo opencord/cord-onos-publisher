@@ -9,6 +9,7 @@ ifeq ($(realpath $(MAKE_CONFIG)),)
 $(info Makefile configuration not found, defaults will be used.)
 else
 $(info Using makefile configuration "$(MAKE_CONFIG)")
+include $(MAKE_CONFIG)
 endif
 
 .PHONY: all
