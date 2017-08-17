@@ -87,12 +87,12 @@ ext {
 
 task buildOnosApps (type: Exec) {
     workingDir './apps'
-    commandLine 'mvn', 'clean', 'install', '-U'
+    commandLine 'mvn', 'dependency:copy-dependencies', '-Dmdep.copyPom=false', '-Dmdep.useRepositoryLayout=true', '-DoutputDirectory=m2/repository', '-Dmdep.addParentPoms=false', '-Dtype=oar', '-DexcludeTypes=jar', '-Dsilent=true', '-f', 'dependencies.xml'
 }
 
 task copyLocalRepo (dependsOn: buildOnosApps, type: Exec) {
     workingDir './'
-    commandLine 'cp', '-R', System.env.HOME + '/.m2/repository', '.'
+    commandLine 'cp', '-R', 'apps/m2/repository', '.'
 }
 
 task buildRepoImage (dependsOn: copyLocalRepo, type: Exec) {

@@ -19,6 +19,10 @@ all: build
 build:
 	docker build -f Dockerfile.make -t $(IMAGE_NAME):$(DEPLOY_DOCKER_TAG) $(ROOT_DIR)
 
+.PHONY: onos
+onos:
+	docker build -t cord/onos:latest -f docker/Dockerfile.onos .
+
 .PHONY: publish
 publish:
 	docker tag $(IMAGE_NAME):$(DEPLOY_DOCKER_TAG) $(DOCKER_REGISTRY)/$(IMAGE_NAME):$(DEPLOY_DOCKER_TAG)
