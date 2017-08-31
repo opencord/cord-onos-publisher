@@ -20,7 +20,7 @@ FROM maven:3-jdk-8 as maven
 COPY settings.xml /root/.m2/settings.xml
 COPY . /mavenwd
 WORKDIR /mavenwd/apps
-RUN mvn clean install -U
+RUN mvn dependency:copy-dependencies -Dmdep.copyPom=false -Dmdep.useRepositoryLayout=true -DoutputDirectory=m2/repository -Dmdep.addParentPoms=false -Dtype=oar -DexcludeTypes=jar -Dsilent=true -f dependencies.xml
 
 FROM nginx
 WORKDIR /usr/share/nginx/html
