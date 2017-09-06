@@ -46,8 +46,9 @@
         <module>mcast</module>
         <module>olt</module>
         <module>sadis</module>
-	<module>vtn</module>
-	<module>dhcpl2relay</module>
+        <module>vtn</module>
+        <module>dhcpl2relay</module>
+        <module>carrierethernet</module>
     </modules>
 
 <!--
