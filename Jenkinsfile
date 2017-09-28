@@ -3,5 +3,5 @@ node ('master') {
     checkout([$class: 'RepoScm', currentBranch: true, manifestRepositoryUrl: 'https://gerrit.opencord.org/manifest', quiet: true])
     
     stage 'Build and Publish apps'
-    sh 'cd onos-apps && ./gradlew release'
+    sh 'cd onos-apps/apps && mvn clean deploy'
 }
