@@ -48,8 +48,36 @@
         </dependency>
 
         <dependency>
-            <groupId>org.opencord</groupId>
-            <artifactId>ce</artifactId>
+            <groupId>org.opencord.ce</groupId>
+            <artifactId>ce-api</artifactId>
+            <version>${ce.version}</version>
+            <type>oar</type>
+        </dependency>
+
+        <dependency>
+            <groupId>org.opencord.ce</groupId>
+            <artifactId>ecord-global-app</artifactId>
+            <version>${ce.version}</version>
+            <type>oar</type>
+        </dependency>
+
+        <dependency>
+            <groupId>org.opencord.ce</groupId>
+            <artifactId>ecord-local-app</artifactId>
+            <version>${ce.version}</version>
+            <type>oar</type>
+        </dependency>
+
+        <dependency>
+            <groupId>org.opencord.ce</groupId>
+            <artifactId>vee</artifactId>
+            <version>${ce.version}</version>
+            <type>oar</type>
+        </dependency>
+
+        <dependency>
+            <groupId>org.opencord.ce</groupId>
+            <artifactId>co</artifactId>
             <version>${ce.version}</version>
             <type>oar</type>
         </dependency>
