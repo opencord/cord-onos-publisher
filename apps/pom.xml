@@ -48,6 +48,7 @@
         <module>sadis</module>
 	<module>vtn</module>
 	<module>dhcpl2relay</module>
+        <module>carrierethernet</module>
     </modules>
 
 <!--
