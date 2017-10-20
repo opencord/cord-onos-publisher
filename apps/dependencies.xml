@@ -70,6 +70,20 @@
 
         <dependency>
             <groupId>org.opencord.ce</groupId>
+            <artifactId>bigswitch</artifactId>
+            <version>${ce.version}</version>
+            <type>oar</type>
+        </dependency>
+
+        <dependency>
+            <groupId>org.opencord.ce</groupId>
+            <artifactId>local-channel</artifactId>
+            <version>${ce.version}</version>
+            <type>oar</type>
+        </dependency>
+
+        <dependency>
+            <groupId>org.opencord.ce</groupId>
             <artifactId>vee</artifactId>
             <version>${ce.version}</version>
             <type>oar</type>
@@ -77,7 +91,7 @@
 
         <dependency>
             <groupId>org.opencord.ce</groupId>
-            <artifactId>co</artifactId>
+            <artifactId>fabric</artifactId>
             <version>${ce.version}</version>
             <type>oar</type>
         </dependency>
