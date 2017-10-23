@@ -1,4 +1,4 @@
-FROM onosproject/onos:1.10.3 as build
+FROM onosproject/onos:1.10.8 as build
 MAINTAINER Open Networking Foundation <info@opennetworking.org>
 
 ENV BUILD_ROOT=/build
@@ -42,7 +42,7 @@ RUN chmod 755 ./app-install.sh
 RUN ./app-install.sh
 
 # Create the final image coping over the installed applications from the build stage
-FROM onosproject/onos:1.10.3
+FROM onosproject/onos:1.10.8
 
 # Install Key Store Options
 ENV JAVA_OPTS="${JAVA_OPTS:--DenableOFTLS=true -Djavax.net.ssl.keyStore=/home/sdn/wiki/onos.jks -Djavax.net.ssl.keyStorePassword=222222 -Djavax.net.ssl.trustStore=/home/sdn/wiki/onos.jks -Djavax.net.ssl.trustStorePassword=222222}"
