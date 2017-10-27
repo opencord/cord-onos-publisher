@@ -65,5 +65,3 @@ RUN touch $ONOS/apps/org.onosproject.openflow-base/active
 # Create ONOS Key Directory
 RUN mkdir -p /home/sdn/wiki
 COPY docker/onos_cfg/ /home/sdn/wiki
-
-
