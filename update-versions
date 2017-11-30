@@ -6,7 +6,7 @@
 
 APP_VERSION=$1
 ONOS_VERSION=$2
-APPS="aaa config igmp mcast olt vtn"
+APPS="aaa config igmp mcast olt vtn carrierethernet"
 
 cd apps
 
