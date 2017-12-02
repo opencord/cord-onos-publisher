@@ -33,7 +33,7 @@
         <olt.version>1.4.0-SNAPSHOT</olt.version>
         <sadis.version>1.2.0-SNAPSHOT</sadis.version>
         <vtn.version>1.4.0-SNAPSHOT</vtn.version>
-        <ce.version>1.0.0-SNAPSHOT</ce.version>
+        <ce.version>1.1.0-SNAPSHOT</ce.version>
 
         <!-- TODO onos-build-conf.version can be dropped when onos.version > 1.10.3 -->
         <onos-build-conf.version>1.10.3-onf</onos-build-conf.version>
