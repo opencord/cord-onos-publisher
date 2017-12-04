@@ -37,7 +37,7 @@ def changeVersion(def newVersion) {
 }
 
 node ('master') {
-    stage 'Checkout code' {
+    stage ('Checkout code') {
         //checkout([$class: 'RepoScm', currentBranch: true, manifestRepositoryUrl: 'https://gerrit.opencord.org/manifest', quiet: true])
         git branch: branch, url: 'ssh://jenkins@gerrit.opencord.org:29418/' + app
     }
@@ -51,59 +51,59 @@ node ('master') {
     //  echo "Support branch " + branch + " already exists"
     //}
     
-    stage 'Checkout branch' {
+    stage ('Checkout branch') {
         sh 'git checkout ' + branch
         sh 'gitdir=$(git rev-parse --git-dir); scp -p -P 29418 jenkins@gerrit.opencord.org:hooks/commit-msg ${gitdir}/hooks/'
     }
         
-    stage 'Bump versions' {
+    stage ('Bump versions') {
         changeVersion(version)
     }
     
-    stage 'Commit' {
+    stage ('Commit') {
         sh 'git add -A && git commit -m "Release version ' + version + '"'
     }
     
-    stage 'Build and Test' {
+    stage ('Build and Test') {
         // TODO can we do this with clean .m2?
         sh 'mvn clean install'
     }
 
-    stage 'Push to Gerrit' {
+    stage ('Push to Gerrit') {
         sh 'git push origin HEAD:refs/for/' + branch
     }
     
-    stage 'Wait for merge' {
+    stage ('Wait for merge') {
         timeout(time: 1, unit: 'HOURS') {
             metadata = input id: 'release-build', message: 'Go to Gerrit and merge the release patch',
                     submitter: 'jono'
         }
     }
 
-    stage 'Release to Maven Central' {
+    stage ('Release to Maven Central') {
         sh 'mvn -Prelease clean deploy'
     }
 
-    stage 'Wait for release OKed' {
+    stage ('Wait for release OKed') {
         timeout(time: 1, unit: 'HOURS') {
             metadata = input id: 'release-build', message: 'Release the artifacts on Sonatype',
                     submitter: 'jono'
         }
     }
 
-    stage 'Tag the release' {
+    stage ('Tag the release') {
         sh 'git tag -a ' + version + ' -m "Tagging version ' + version + '"'
         sh 'git push origin ' + version
     }
     
-    stage 'Move to next SNAPSHOT version' {
+    stage ('Move to next SNAPSHOT version') {
         def snapshot = nextVersion + '-SNAPSHOT'
         changeVersion(snapshot)
         sh 'git add -A && git commit -m "Starting snapshot ' + snapshot + '"'
         sh 'git push origin HEAD:refs/for/' + branch
     }
 
-    stage 'Finish' {
+    stage ('Finish') {
         sh 'echo "Released new app. Go to Gerrit and merge snapshot version bump"'
     }
     
