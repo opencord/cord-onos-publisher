@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-def app = ${app}
-def version = ${version}
-def branch = ${branch}
+def app = '${app}'
+def version = '${version}'
+def branch = '${branch}'
 
 def createBranch(def proj, def branch, def parent) {
     cmd = 'ssh -p 29418 gerrit.opencord.org gerrit create-branch ' + proj + " " + branch + " " + parent
@@ -33,31 +33,42 @@ int checkBranchExists(def proj, def branch) {
 node ('master') {
     stage 'Checkout code'
     //checkout([$class: 'RepoScm', currentBranch: true, manifestRepositoryUrl: 'https://gerrit.opencord.org/manifest', quiet: true])
-    checkout([$class: 'GitSCM',
-        userRemoteConfigs: [[url: 'https://gerrit.opencord.org/' + app]]
-    ])
+    git branch: branch, url: 'https://gerrit.opencord.org/' + app
 
     
     //stage 'Create support branch'
-    //TODO add a sanity check from human
     //if (checkBranchExists(app, branch) == 0) {
-	//	echo "Branch " + branch + " doesn't exist, creating
-		//createBranch(app, version, 'opencord/master')
-	//} else {
-	//	echo "Support branch " + branch + " already exists"
-	//}
-	
-	stage 'Checkout branch'
-	sh 'cd ' + app + ' && git checkout ' + branch
-    	
-	stage 'Bump versions'
-	sh 'cd ' + app + ' && mvn change-version'
-	
-	//stage 'Commit'
-	
-	//stage 'Push to Gerrit'
-	
-	//stage 'Tag'
+    //  echo "Branch " + branch + " doesn't exist, creating
+        //createBranch(app, version, 'opencord/master')
+    //} else {
+    //  echo "Support branch " + branch + " already exists"
+    //}
+    
+    stage 'Checkout branch'
+    sh 'git checkout ' + branch
+        
+    stage 'Bump versions'
+    // TODO any other versions we need to account for?
+    sh 'mvn versions:set -DnewVersion=' + version + ' versions:commit'
+    
+    stage 'Commit'
+    sh 'git add -A && git commit -m "Release version ' + version + '"'
+    
+    stage 'Build and Test'
+    // TODO can we do this with clean .m2?
+    sh 'mvn clean install'
+
+    stage 'Push to Gerrit'
+    sh 'git push opencord HEAD:refs/for/' + branch
+    
+    stage 'Wait for merge'
+    timeout(time: 1, unit: 'HOURS') {
+        metadata = input id: 'release-build', message: 'Should I perform a release?',
+                parameters: [booleanParam(defaultValue: true,
+                description: 'Release onos applications (assumes versions have been updated)', name: 'build_onos_apps'),
+                string(defaultValue: branch, description: 'Release version', name: 'release_version')], submitter: 'jono'
+    }
+    //stage 'Tag'
     
     //stage 'Build and Publish apps'
     //sh 'cd onos-apps && ./gradlew release'
