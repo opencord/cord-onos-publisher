@@ -31,7 +31,7 @@ int checkBranchExists(def proj, def branch) {
     return 0
 }
 
-def changeVersion(dev newVersion) {
+def changeVersion(def newVersion) {
     // TODO any other versions we need to account for?
     sh 'mvn versions:set -DnewVersion=' + newVersion + ' versions:commit'
 }
