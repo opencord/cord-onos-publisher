@@ -17,19 +17,6 @@ def version = '${version}'
 def nextVersion = '${nextVersion}'
 def branch = '${branch}'
 
-def createBranch(def proj, def branch, def parent) {
-    cmd = 'ssh -p 29418 gerrit.opencord.org gerrit create-branch ' + proj + " " + branch + " " + parent
-    sh returnStdout: true, script: cmd
-}
-
-int checkBranchExists(def proj, def branch) {
-    url = 'https://gerrit.opencord.org/projects/' + proj + '/branches/' + branch
-    response = httpRequest url: url, validResponseCodes: '200,404'
-    if (response.status == 404) {
-        return 1
-    }
-    return 0
-}
 
 def changeVersion(def newVersion) {
     // TODO any other versions we need to account for?
@@ -37,40 +24,26 @@ def changeVersion(def newVersion) {
 }
 
 node ('master') {
-    stage ('Clean workspace') {
-        cleanWs()
-    }
-    
-    stage ('Checkout code') {
-        //checkout([$class: 'RepoScm', currentBranch: true, manifestRepositoryUrl: 'https://gerrit.opencord.org/manifest', quiet: true])
-        git branch: branch, url: 'ssh://jenkins@gerrit.opencord.org:29418/' + app
-    }
 
-    
-    //stage 'Create support branch'
-    //if (checkBranchExists(app, branch) == 0) {
-    //  echo "Branch " + branch + " doesn't exist, creating
-        //createBranch(app, version, 'opencord/master')
-    //} else {
-    //  echo "Support branch " + branch + " already exists"
-    //}
-    
-    stage ('Checkout branch') {
-        sh 'git checkout ' + branch
+    stage ('Checkout code') {
+        cleanWs()
+
+        git branch: branch, url: 'ssh://jenkins@gerrit.opencord.org:29418/' + app
+
         sh 'gitdir=$(git rev-parse --git-dir); scp -p -P 29418 jenkins@gerrit.opencord.org:hooks/commit-msg ${gitdir}/hooks/'
     }
         
-    stage ('Bump versions') {
+    stage ('Move to release version') {
         changeVersion(version)
-    }
-    
-    stage ('Commit') {
         sh 'git add -A && git commit -m "Release version ' + version + '"'
     }
     
+    // This step is basically to test that everything still builds once the version has
+    // been bumped up before we start pushing things publicly
     stage ('Build and Test') {
         // TODO can we do this with clean .m2?
         sh 'mvn clean install'
+        sh 'mvn javadoc:javadoc'
     }
 
     stage ('Push to Gerrit') {
@@ -79,7 +52,8 @@ node ('master') {
     
     stage ('Wait for merge') {
         timeout(time: 1, unit: 'HOURS') {
-            metadata = input id: 'release-build', message: 'Go to Gerrit and merge the release patch',
+            metadata = input id: 'release-build', 
+            message: 'Go to Gerrit and merge the release patch',
                     submitter: 'jono'
         }
     }
@@ -88,9 +62,10 @@ node ('master') {
         sh 'mvn -Prelease clean deploy'
     }
 
-    stage ('Wait for release OKed') {
+    stage ('Wait for release on Sonatype') {
         timeout(time: 1, unit: 'HOURS') {
-            metadata = input id: 'release-build', message: 'Release the artifacts on Sonatype',
+            metadata = input id: 'release-build', 
+            message: 'Go to Sonatype and release the artifacts',
                     submitter: 'jono'
         }
     }
