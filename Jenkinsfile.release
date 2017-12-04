@@ -14,6 +14,7 @@
 
 def app = '${app}'
 def version = '${version}'
+def nextVersion = '${nextVersion}'
 def branch = '${branch}'
 
 def createBranch(def proj, def branch, def parent) {
@@ -30,10 +31,16 @@ int checkBranchExists(def proj, def branch) {
     return 0
 }
 
+def changeVersion(dev newVersion) {
+    // TODO any other versions we need to account for?
+    sh 'mvn versions:set -DnewVersion=' + newVersion + ' versions:commit'
+}
+
 node ('master') {
-    stage 'Checkout code'
-    //checkout([$class: 'RepoScm', currentBranch: true, manifestRepositoryUrl: 'https://gerrit.opencord.org/manifest', quiet: true])
-    git branch: branch, url: 'https://gerrit.opencord.org/' + app
+    stage 'Checkout code' {
+        //checkout([$class: 'RepoScm', currentBranch: true, manifestRepositoryUrl: 'https://gerrit.opencord.org/manifest', quiet: true])
+        git branch: branch, url: 'ssh://jenkins@gerrit.opencord.org:29418/' + app
+    }
 
     
     //stage 'Create support branch'
@@ -44,36 +51,60 @@ node ('master') {
     //  echo "Support branch " + branch + " already exists"
     //}
     
-    stage 'Checkout branch'
-    sh 'git checkout ' + branch
-        
-    stage 'Bump versions'
-    // TODO any other versions we need to account for?
-    sh 'mvn versions:set -DnewVersion=' + version + ' versions:commit'
-    
-    stage 'Commit'
-    sh 'git add -A && git commit -m "Release version ' + version + '"'
-    
-    stage 'Build and Test'
-    // TODO can we do this with clean .m2?
-    sh 'mvn clean install'
-
-    stage 'Push to Gerrit'
-    sh 'git push opencord HEAD:refs/for/' + branch
-    
-    stage 'Wait for merge'
-    timeout(time: 1, unit: 'HOURS') {
-        metadata = input id: 'release-build', message: 'Should I perform a release?',
-                parameters: [booleanParam(defaultValue: true,
-                description: 'Release onos applications (assumes versions have been updated)', name: 'build_onos_apps'),
-                string(defaultValue: branch, description: 'Release version', name: 'release_version')], submitter: 'jono'
+    stage 'Checkout branch' {
+        sh 'git checkout ' + branch
+        sh 'gitdir=$(git rev-parse --git-dir); scp -p -P 29418 jenkins@gerrit.opencord.org:hooks/commit-msg ${gitdir}/hooks/'
     }
-    //stage 'Tag'
+        
+    stage 'Bump versions' {
+        changeVersion(version)
+    }
     
-    //stage 'Build and Publish apps'
-    //sh 'cd onos-apps && ./gradlew release'
+    stage 'Commit' {
+        sh 'git add -A && git commit -m "Release version ' + version + '"'
+    }
     
-    //stage 'Bump versions forward on branch'
+    stage 'Build and Test' {
+        // TODO can we do this with clean .m2?
+        sh 'mvn clean install'
+    }
+
+    stage 'Push to Gerrit' {
+        sh 'git push origin HEAD:refs/for/' + branch
+    }
     
-    //stage 'Bump versions forward on master'
+    stage 'Wait for merge' {
+        timeout(time: 1, unit: 'HOURS') {
+            metadata = input id: 'release-build', message: 'Go to Gerrit and merge the release patch',
+                    submitter: 'jono'
+        }
+    }
+
+    stage 'Release to Maven Central' {
+        sh 'mvn -Prelease clean deploy'
+    }
+
+    stage 'Wait for release OKed' {
+        timeout(time: 1, unit: 'HOURS') {
+            metadata = input id: 'release-build', message: 'Release the artifacts on Sonatype',
+                    submitter: 'jono'
+        }
+    }
+
+    stage 'Tag the release' {
+        sh 'git tag -a ' + version + ' -m "Tagging version ' + version + '"'
+        sh 'git push origin ' + version
+    }
+    
+    stage 'Move to next SNAPSHOT version' {
+        def snapshot = nextVersion + '-SNAPSHOT'
+        changeVersion(snapshot)
+        sh 'git add -A && git commit -m "Starting snapshot ' + snapshot + '"'
+        sh 'git push origin HEAD:refs/for/' + branch
+    }
+
+    stage 'Finish' {
+        sh 'echo "Released new app. Go to Gerrit and merge snapshot version bump"'
+    }
+    
 }
