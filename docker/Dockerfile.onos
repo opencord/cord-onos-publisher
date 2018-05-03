@@ -1,4 +1,4 @@
-FROM onosproject/onos:1.10.10 as build
+FROM onosproject/onos:1.13.1 as build
 MAINTAINER Open Networking Foundation <info@opennetworking.org>
 
 ENV BUILD_ROOT=/build
@@ -15,15 +15,15 @@ ENV KARAF_M2=${KARAF_ROOT}/system
 ENV APP_INSTALL_ROOT=/expand
 
 # Specify application versions to install
-ENV AAA_VERSION=1.4.0-SNAPSHOT \
+ENV AAA_VERSION=1.6.0-SNAPSHOT \
 	CONFIG_VERSION=1.4.0-SNAPSHOT \
 	IGMP_VERSION=1.4.0-SNAPSHOT \
 	IGMP_PROXY_VERSION=1.2.0-SNAPSHOT \
 	MCAST_VERSION=1.4.0-SNAPSHOT \
 	OLT_VERSION=1.4.0-SNAPSHOT \
-	SADIS_VERSION=1.2.0-SNAPSHOT \
-	VTN_VERSION=1.4.0-SNAPSHOT \
-	L2_DHCP_RELAY_VERSION=1.2.0-SNAPSHOT
+	SADIS_VERSION=2.1.0-SNAPSHOT \
+	VTN_VERSION=1.6.0-SNAPSHOT \
+	L2_DHCP_RELAY_VERSION=1.4.0-SNAPSHOT
 
 ENV APPS="aaa-${AAA_VERSION} \
 	cord-config-${CONFIG_VERSION} \
@@ -42,7 +42,7 @@ RUN chmod 755 ./app-install.sh
 RUN ./app-install.sh
 
 # Create the final image coping over the installed applications from the build stage
-FROM onosproject/onos:1.10.10
+FROM onosproject/onos:1.13.1
 
 # Install Key Store Options
 ENV JAVA_OPTS="${JAVA_OPTS:--DenableOFTLS=true -Djavax.net.ssl.keyStore=/home/sdn/wiki/onos.jks -Djavax.net.ssl.keyStorePassword=222222 -Djavax.net.ssl.trustStore=/home/sdn/wiki/onos.jks -Djavax.net.ssl.trustStorePassword=222222}"
