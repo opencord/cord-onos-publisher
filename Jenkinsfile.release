@@ -25,6 +25,10 @@ def changeVersion(def newVersion) {
 
 node ('ubuntu16.04-basebuild-1c-2g') {
 
+    stage ('Debug') {
+        sh 'cat ~/.ssh/known_hosts'
+    }
+
     stage ('Checkout code') {
         cleanWs()
 
