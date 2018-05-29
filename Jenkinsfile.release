@@ -23,7 +23,7 @@ def changeVersion(def newVersion) {
     sh 'mvn versions:set -DnewVersion=' + newVersion + ' versions:commit'
 }
 
-node ('master') {
+node ('ubuntu16.04-basebuild-1c-2g') {
 
     stage ('Checkout code') {
         cleanWs()
@@ -59,7 +59,9 @@ node ('master') {
     }
 
     stage ('Release to Maven Central') {
-        sh 'mvn -Prelease clean deploy'
+        configFileProvider([configFile(fileId: 'onoscord-apps', variable: 'MAVEN_SETTINGS')]) {
+            sh 'mvn -s $MAVEN_SETTINGS -Prelease clean deploy'
+        }
     }
 
     stage ('Wait for release on Sonatype') {
