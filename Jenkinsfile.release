@@ -25,21 +25,37 @@ def changeVersion(def newVersion) {
 
 node ('ubuntu16.04-basebuild-1c-2g') {
 
-    stage ('Debug') {
-        sh 'cat ~/.ssh/known_hosts'
+    stage ('Configure Git') {
+        sh 'ssh-keyscan -H -t rsa -p 29418 gerrit.opencord.org >> ~/.ssh/known_hosts'
+        
+        sh 'git config --global user.name "Jenkins"'
+        sh 'git config --global user.email "do-not-reply@opencord.org"'
     }
 
     stage ('Checkout code') {
         cleanWs()
+        
+        sshagent (credentials: ['gerrit-jenkins-user']) {
+            git branch: branch, url: 'ssh://jenkins@gerrit.opencord.org:29418/' + app, credentialsId: 'gerrit-jenkins-user'
 
-        git branch: branch, url: 'ssh://jenkins@gerrit.opencord.org:29418/' + app
-
-        sh 'gitdir=$(git rev-parse --git-dir); scp -p -P 29418 jenkins@gerrit.opencord.org:hooks/commit-msg ${gitdir}/hooks/'
+            sh 'gitdir=$(git rev-parse --git-dir); scp -p -P 29418 jenkins@gerrit.opencord.org:hooks/commit-msg ${gitdir}/hooks/'
+        }
     }
         
     stage ('Move to release version') {
         changeVersion(version)
         sh 'git add -A && git commit -m "Release version ' + version + '"'
+    }
+
+    stage ('Verify code') {
+        def found = sh script:'egrep -R SNAPSHOT .' returnStatus:true
+        if (found == 0) {
+            timeout(time: 1, unit: 'HOURS') {
+                metadata = input id: 'manual-verify', 
+                message: 'Found references to SNAPSHOT in the code. Are you sure you want to release?',
+                        submitter: 'jono,dbainbri'
+            }
+        }
     }
     
     // This step is basically to test that everything still builds once the version has
@@ -51,7 +67,9 @@ node ('ubuntu16.04-basebuild-1c-2g') {
     }
 
     stage ('Push to Gerrit') {
-        sh 'git push origin HEAD:refs/for/' + branch
+        sshagent (credentials: ['gerrit-jenkins-user']) {
+            sh 'git push origin HEAD:refs/for/' + branch
+        }
     }
     
     stage ('Wait for merge') {
@@ -78,14 +96,18 @@ node ('ubuntu16.04-basebuild-1c-2g') {
 
     stage ('Tag the release') {
         sh 'git tag -a ' + version + ' -m "Tagging version ' + version + '"'
-        sh 'git push origin ' + version
+        sshagent (credentials: ['gerrit-jenkins-user']) {
+            sh 'git push origin ' + version
+        }
     }
     
     stage ('Move to next SNAPSHOT version') {
         def snapshot = nextVersion + '-SNAPSHOT'
         changeVersion(snapshot)
         sh 'git add -A && git commit -m "Starting snapshot ' + snapshot + '"'
-        sh 'git push origin HEAD:refs/for/' + branch
+        sshagent (credentials: ['gerrit-jenkins-user']) {
+            sh 'git push origin HEAD:refs/for/' + branch
+        }
     }
 
     stage ('Finish') {
