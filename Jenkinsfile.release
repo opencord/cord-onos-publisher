@@ -48,7 +48,7 @@ node ('ubuntu16.04-basebuild-1c-2g') {
     }
 
     stage ('Verify code') {
-        def found = sh script:'egrep -R SNAPSHOT .' returnStatus:true
+        def found = sh script:'egrep -R SNAPSHOT .', returnStatus:true
         if (found == 0) {
             timeout(time: 1, unit: 'HOURS') {
                 metadata = input id: 'manual-verify', 
