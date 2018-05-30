@@ -25,14 +25,18 @@ def changeVersion(def newVersion) {
 
 node ('ubuntu16.04-basebuild-1c-2g') {
 
-    stage ('Configure Git') {
+    stage ('Configure system') {
         sh 'ssh-keyscan -H -t rsa -p 29418 gerrit.opencord.org >> ~/.ssh/known_hosts'
         
         sh 'git config --global user.name "Jenkins"'
         sh 'git config --global user.email "do-not-reply@opencord.org"'
+        
+        withCredentials([file(credentialsId: 'gpg-creds-maven', variable: 'GPUPG')]) {
+            sh 'tar -xvf $GPUPG -C ~'
+        }
     }
 
-    stage ('Checkout code') {
+    stage ('Check out code') {
         cleanWs()
         
         sshagent (credentials: ['gerrit-jenkins-user']) {
@@ -46,9 +50,10 @@ node ('ubuntu16.04-basebuild-1c-2g') {
         changeVersion(version)
         sh 'git add -A && git commit -m "Release version ' + version + '"'
     }
-
+    
     stage ('Verify code') {
         def found = sh script:'egrep -R SNAPSHOT .', returnStatus:true
+        
         if (found == 0) {
             timeout(time: 1, unit: 'HOURS') {
                 metadata = input id: 'manual-verify', 
@@ -73,10 +78,13 @@ node ('ubuntu16.04-basebuild-1c-2g') {
     }
     
     stage ('Wait for merge') {
-        timeout(time: 1, unit: 'HOURS') {
-            metadata = input id: 'release-build', 
-            message: 'Go to Gerrit and merge the release patch',
-                    submitter: 'jono,dbainbri'
+        wrap([$class: 'BuildUser']) {
+            echo env.BUILD_USER_ID
+            timeout(time: 1, unit: 'HOURS') {
+                metadata = input id: 'release-build', 
+                message: 'Go to Gerrit and merge the release patch',
+                        submitter: env.BUILD_USER_ID
+            }
         }
     }
 
@@ -115,3 +123,4 @@ node ('ubuntu16.04-basebuild-1c-2g') {
     }
     
 }
+
