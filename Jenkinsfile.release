@@ -17,20 +17,29 @@ def version = '${version}'
 def nextVersion = '${nextVersion}'
 def branch = '${branch}'
 
-
 def changeVersion(def newVersion) {
     // TODO any other versions we need to account for?
     sh 'mvn versions:set -DnewVersion=' + newVersion + ' versions:commit'
 }
 
 node ('ubuntu16.04-basebuild-1c-2g') {
+    
+    sh 'echo Releasing ' + app + ' repository on ' + branch + ' branch'
+    sh 'echo Releasing version ' + version + ' and starting ' + nextVersion + '-SNAPSHOT'
+    
+    def userId = wrap([$class: 'BuildUser']) {
+       return env.BUILD_USER_ID
+    }
 
     stage ('Configure system') {
+        echo "Release build triggered by " + userId
+        
         sh 'ssh-keyscan -H -t rsa -p 29418 gerrit.opencord.org >> ~/.ssh/known_hosts'
         
         sh 'git config --global user.name "Jenkins"'
         sh 'git config --global user.email "do-not-reply@opencord.org"'
         
+        // GPG key used to sign maven artifacts
         withCredentials([file(credentialsId: 'gpg-creds-maven', variable: 'GPUPG')]) {
             sh 'tar -xvf $GPUPG -C ~'
         }
@@ -58,7 +67,7 @@ node ('ubuntu16.04-basebuild-1c-2g') {
             timeout(time: 1, unit: 'HOURS') {
                 metadata = input id: 'manual-verify', 
                 message: 'Found references to SNAPSHOT in the code. Are you sure you want to release?',
-                        submitter: 'jono,dbainbri'
+                        submitter: userId
             }
         }
     }
@@ -66,7 +75,6 @@ node ('ubuntu16.04-basebuild-1c-2g') {
     // This step is basically to test that everything still builds once the version has
     // been bumped up before we start pushing things publicly
     stage ('Build and Test') {
-        // TODO can we do this with clean .m2?
         sh 'mvn clean install'
         sh 'mvn javadoc:javadoc'
     }
@@ -81,11 +89,12 @@ node ('ubuntu16.04-basebuild-1c-2g') {
         timeout(time: 1, unit: 'HOURS') {
             metadata = input id: 'release-build', 
             message: 'Go to Gerrit and merge the release patch',
-                    submitter: 'jono,dbainbri'
+                    submitter: userId
         }
+        
     }
 
-    stage ('Release to Maven Central') {
+    stage ('Release artifacts') {
         configFileProvider([configFile(fileId: 'onoscord-apps', variable: 'MAVEN_SETTINGS')]) {
             sh 'mvn -s $MAVEN_SETTINGS -Prelease clean deploy'
         }
@@ -94,8 +103,8 @@ node ('ubuntu16.04-basebuild-1c-2g') {
     stage ('Wait for release on Sonatype') {
         timeout(time: 1, unit: 'HOURS') {
             metadata = input id: 'release-build', 
-            message: 'Go to Sonatype and release the artifacts',
-                    submitter: 'jono,dbainbri'
+            message: 'Go to http://oss.sonatype.org and release the artifacts',
+                    submitter: userId
         }
     }
 
@@ -116,7 +125,7 @@ node ('ubuntu16.04-basebuild-1c-2g') {
     }
 
     stage ('Finish') {
-        sh 'echo "Released new app. Go to Gerrit and merge snapshot version bump"'
+        sh 'echo "Release done! Go to Gerrit and merge snapshot version bump"'
     }
     
 }
