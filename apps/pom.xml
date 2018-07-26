@@ -43,6 +43,7 @@
         <module>config</module>
         <module>igmp</module>
         <module>igmpproxy</module>
+        <module>kafka-onos</module>
         <module>mcast</module>
         <module>olt</module>
         <module>sadis</module>
