@@ -4,6 +4,6 @@ node ('ubuntu16.04-basebuild-1c-2g') {
 
     stage 'Build and Publish apps'
     configFileProvider([configFile(fileId: 'onoscord-apps', variable: 'MAVEN_SETTINGS')]) {
-        sh '_JAVA_OPTIONS=-Djdk.net.URLClassPath.disableClassPathURLCheck=true && cd onos-apps/apps && mvn -s $MAVEN_SETTINGS clean deploy'
+        sh 'export _JAVA_OPTIONS=-Djdk.net.URLClassPath.disableClassPathURLCheck=true && cd onos-apps/apps && mvn -s $MAVEN_SETTINGS clean deploy'
     }
 }
