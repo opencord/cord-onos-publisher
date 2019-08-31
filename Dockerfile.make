@@ -29,7 +29,7 @@ RUN chown nginx:nginx -R /usr/share/nginx/html/repository
 
 # Label image
 ARG org_label_schema_schema_version=1.0
-ARG org_label_schema_name=opencord/mavenrepo
+ARG org_label_schema_name=mavenrepo
 ARG org_label_schema_version=unknown
 ARG org_label_schema_vcs_url=unknown
 ARG org_label_schema_vcs_ref=unknown
