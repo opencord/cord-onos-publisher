@@ -52,4 +52,5 @@ apps/carrierethernet/
 apps/sadis/
 apps/igmpproxy/
 apps/dhcpl2relay/
-
+apps/fabric-tofino/
+apps/bng/
